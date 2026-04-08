@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import Button from "@/components/ui/button";
@@ -23,7 +23,7 @@ function Section({ children, className = "" }) {
   );
 }
 
-export default function BookingPage() {
+function BookingPageContent() {
   const searchParams = useSearchParams();
   const initialService = searchParams.get("service") || "";
   const initialHealer = searchParams.get("healer") || "";
@@ -149,5 +149,13 @@ export default function BookingPage() {
         ) : null}
       </Section>
     </div>
+  );
+}
+
+export default function BookingPage() {
+  return (
+    <Suspense fallback={<div className="px-6 py-20 text-center text-ink-300">Loading booking...</div>}>
+      <BookingPageContent />
+    </Suspense>
   );
 }
