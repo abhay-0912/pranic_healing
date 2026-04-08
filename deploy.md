@@ -95,6 +95,18 @@ Set these in your backend host:
 - Build command: `npm run build`.
 - Output directory: default.
 
+### Vercel quick setup (important)
+
+- Keep project root as `./`.
+- Use the Next.js preset, not `Other`.
+- Do not add backend-only vars like `PORT` to the frontend Vercel project.
+- Add these frontend env vars in Vercel:
+	- `NEXT_PUBLIC_SUPABASE_URL`
+	- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+	- `NEXT_PUBLIC_SITE_URL`
+	- `NEXT_PUBLIC_API_BASE_URL`
+	- `NEXT_PUBLIC_RAZORPAY_KEY_ID`
+
 ### After deploy
 
 - Confirm the home page loads.

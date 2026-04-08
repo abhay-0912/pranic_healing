@@ -2,6 +2,9 @@
   "name": "pranic-healing-center",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.18.0 <23"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,7 +13,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
     "lucide-react": "^0.479.0",
-    "next": "14.2.24",
+    "next": "^14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
