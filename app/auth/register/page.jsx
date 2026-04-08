@@ -1,0 +1,210 @@
+"use client";
+
+import { useState } from "react";
+import { Chrome, Loader2, Mail, Lock, Phone, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Button from "@/components/ui/button";
+import AuthCard from "@/components/ui/auth-card";
+import { getSupabaseBrowserClient, hasSupabaseEnv } from "@/lib/supabase/client";
+
+export default function RegisterPage() {
+  const router = useRouter();
+  const supabase = getSupabaseBrowserClient();
+  const supabaseConfigured = hasSupabaseEnv();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!supabase) {
+      setError("Supabase environment variables are missing. Add them in .env.local.");
+      return;
+    }
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (!agree) {
+      setError("Please accept the Terms and Privacy Policy.");
+      return;
+    }
+
+    setLoading(true);
+
+    const { error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          phone
+        },
+        emailRedirectTo: `${window.location.origin}/dashboard`
+      }
+    });
+
+    if (authError) {
+      setError(authError.message);
+      setLoading(false);
+      return;
+    }
+
+    router.replace("/dashboard");
+  };
+
+  const handleGoogleRegister = async () => {
+    if (!supabase) {
+      setError("Supabase environment variables are missing. Add them in .env.local.");
+      return;
+    }
+    setError("");
+    const redirectTo = `${window.location.origin}/dashboard`;
+
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo }
+    });
+
+    if (oauthError) {
+      setError(oauthError.message);
+    }
+  };
+
+  return (
+    <AuthCard
+      eyebrow="Create Account"
+      title="Register"
+      subtitle="Join the center to book sessions, enroll in courses, and track your progress."
+      footer={
+        <p className="text-sm text-ink-500">
+          Already have an account?{" "}
+          <Button href="/auth/login" variant="ghost" className="inline-flex p-0 text-sm font-medium text-gold-200 hover:text-gold-100">
+            Sign In
+          </Button>
+        </p>
+      }
+    >
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <label className="block space-y-2">
+          <span className="text-xs font-medium uppercase tracking-[0.3em] text-gold-200/80">Full Name</span>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-950/70 px-4 py-3 focus-within:border-gold-300/60">
+            <User className="h-4 w-4 text-gold-200/70" />
+            <input
+              type="text"
+              required
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ink-500"
+              placeholder="Your full name"
+            />
+          </div>
+        </label>
+
+        <label className="block space-y-2">
+          <span className="text-xs font-medium uppercase tracking-[0.3em] text-gold-200/80">Email</span>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-950/70 px-4 py-3 focus-within:border-gold-300/60">
+            <Mail className="h-4 w-4 text-gold-200/70" />
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ink-500"
+              placeholder="you@example.com"
+            />
+          </div>
+        </label>
+
+        <label className="block space-y-2">
+          <span className="text-xs font-medium uppercase tracking-[0.3em] text-gold-200/80">Phone</span>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-950/70 px-4 py-3 focus-within:border-gold-300/60">
+            <Phone className="h-4 w-4 text-gold-200/70" />
+            <input
+              type="tel"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ink-500"
+              placeholder="Mobile number"
+            />
+          </div>
+        </label>
+
+        <label className="block space-y-2">
+          <span className="text-xs font-medium uppercase tracking-[0.3em] text-gold-200/80">Password</span>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-950/70 px-4 py-3 focus-within:border-gold-300/60">
+            <Lock className="h-4 w-4 text-gold-200/70" />
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ink-500"
+              placeholder="Create a password"
+            />
+          </div>
+        </label>
+
+        <label className="block space-y-2">
+          <span className="text-xs font-medium uppercase tracking-[0.3em] text-gold-200/80">Confirm Password</span>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-950/70 px-4 py-3 focus-within:border-gold-300/60">
+            <Lock className="h-4 w-4 text-gold-200/70" />
+            <input
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ink-500"
+              placeholder="Repeat your password"
+            />
+          </div>
+        </label>
+
+        <label className="flex items-start gap-3 rounded-2xl border border-white/10 bg-ink-950/50 px-4 py-3 text-sm text-ink-500">
+          <input
+            type="checkbox"
+            checked={agree}
+            onChange={(event) => setAgree(event.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent text-gold-300 focus:ring-gold-200"
+          />
+          <span>I agree to the Terms and Privacy Policy.</span>
+        </label>
+
+        {error ? (
+          <p className="rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+            {error}
+          </p>
+        ) : null}
+
+        {!supabaseConfigured ? (
+          <p className="rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-100">
+            Supabase is not configured yet. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local.
+          </p>
+        ) : null}
+
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {loading ? "Creating Account..." : "Create Account"}
+        </Button>
+
+        <div className="relative py-2 text-center text-xs uppercase tracking-[0.35em] text-ink-500">
+          <span className="relative z-10 bg-ink-900/90 px-3">or continue with</span>
+          <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-white/10" />
+        </div>
+
+        <Button type="button" variant="outline" className="w-full" onClick={handleGoogleRegister}>
+          <Chrome className="h-4 w-4" />
+          Google Sign-In
+        </Button>
+      </form>
+    </AuthCard>
+  );
+}
